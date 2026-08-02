@@ -1,0 +1,18 @@
+flow:
+  target_fps: 20
+  size: [96, 96]
+  mode: body_centered_residual_flow
+  algorithm: farneback
+
+motion_basis:
+  n_components: 8
+  explained_variance: 0.95
+
+model:
+  ridge_alpha: 1.0
+
+split:
+  protocol: checkpoint
+  train_fraction: 0.70
+  val_fraction: 0.15
+  random_seed: 13
