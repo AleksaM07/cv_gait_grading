@@ -23,12 +23,5 @@ def load_config(path: str | Path | None) -> dict[str, Any]:
     with config_path.open("r", encoding="utf-8") as file:
         data = yaml.safe_load(file) or {}
     if not isinstance(data, dict):
-        raise ValueError(f"Config root must be a mapping: {config_path}")
+        raise TypeError(f"Config root must be a mapping: {config_path}")
     return data
-
-
-def ensure_parent(path: str | Path) -> Path:
-    """Create the parent directory for an output path."""
-    output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    return output_path

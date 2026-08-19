@@ -11,21 +11,32 @@ dependencies = [
   "scipy>=1.11",
   "matplotlib>=3.8",
   "pillow>=10",
+  "loguru>=0.7",
   "opencv-python>=4.9",
-  "scikit-learn>=1.4",
   "pyyaml>=6",
 ]
 
 [project.optional-dependencies]
-deep = ["torch>=2.2", "torchvision>=0.17"]
+render = ["mujoco>=3.2", "imageio-ffmpeg>=0.5"]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10"]
 
 [project.scripts]
 gait-aqa = "gait_aqa.cli:main"
+render-cmu-mujoco = "gait_aqa.reference_videos.render_mujoco:main"
 
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+
+[tool.ruff.lint]
+# Logging goes through a typed adapter that intentionally supports Loguru `{}`
+# placeholders; Pylint's stdlib-logging rule cannot recognize that protocol.
+ignore = ["PLE1205"]
+
+[tool.ruff.lint.per-file-ignores]
+# A failed clip must be converted to a manifest row so a 580-file batch can
+# continue; these boundary catches intentionally record arbitrary worker errors.
+"src/gait_aqa/reference_videos/render_mujoco.py" = ["BLE001"]
 
 [tool.mypy]
 python_version = "3.11"

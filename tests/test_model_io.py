@@ -21,6 +21,15 @@ class ModelIoTests(unittest.TestCase):
             loaded = load_model(path)
         np.testing.assert_allclose(expected, loaded.predict(x)["scores"])
 
+    def test_missing_target_is_not_fabricated(self) -> None:
+        x = np.arange(20, dtype=float).reshape(5, 4)
+        y_scores = np.tile(np.linspace(10, 90, 5)[:, None], (1, 7))
+        y_scores[:, 3] = np.nan
+        y_labels = np.zeros((5, 8), dtype=float)
+        model = fit_classical_model(x, y_scores, y_labels, [f"f{i}" for i in range(4)])
+        prediction = model.predict(x)["scores"]
+        self.assertTrue(np.isnan(prediction[:, 3]).all())
+
 
 if __name__ == "__main__":
     unittest.main()

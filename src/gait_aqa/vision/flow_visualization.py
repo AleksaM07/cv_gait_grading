@@ -8,7 +8,8 @@ import numpy as np
 def flow_to_rgb(flow: np.ndarray) -> np.ndarray:
     """Convert flow fields to a simple RGB magnitude/angle image."""
     if flow.ndim == 4:
-        field = flow.mean(axis=0)
+        energy = np.linalg.norm(flow, axis=-1).mean(axis=(1, 2))
+        field = flow[int(np.argmax(energy))]
     else:
         field = flow
     magnitude = np.linalg.norm(field, axis=-1)

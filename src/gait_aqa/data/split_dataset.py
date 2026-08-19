@@ -20,19 +20,15 @@ def grouped_split(
         raise ValueError("train_fraction must be in (0, 1)")
     if not 0.0 <= val_fraction < 1.0:
         raise ValueError("val_fraction must be in [0, 1)")
+    if train_fraction + val_fraction >= 1.0:
+        raise ValueError("train_fraction + val_fraction must be less than 1")
     groups = np.asarray(sorted(manifest[group_column].astype(str).unique()))
     rng = np.random.default_rng(seed)
     rng.shuffle(groups)
-    train_end = max(1, int(round(len(groups) * train_fraction)))
-    val_end = min(len(groups), train_end + int(round(len(groups) * val_fraction)))
+    train_end = max(1, round(len(groups) * train_fraction))
+    val_end = min(len(groups), train_end + round(len(groups) * val_fraction))
     split_by_group = {
-        group: (
-            "train"
-            if index < train_end
-            else "val"
-            if index < val_end
-            else "test"
-        )
+        group: ("train" if index < train_end else "val" if index < val_end else "test")
         for index, group in enumerate(groups)
     }
     result = manifest.copy()
@@ -43,11 +39,15 @@ def grouped_split(
     return result
 
 
-def assert_no_group_overlap(manifest: pd.DataFrame, group_column: str = "split_group") -> None:
+def assert_no_group_overlap(
+    manifest: pd.DataFrame, group_column: str = "split_group"
+) -> None:
     """Raise if any group appears in more than one split."""
     if "split" not in manifest:
         raise ValueError("Manifest has no split column")
     counts = manifest.groupby(group_column)["split"].nunique()
     overlapping = counts[counts > 1]
     if not overlapping.empty:
-        raise AssertionError(f"Groups overlap across splits: {overlapping.index.tolist()}")
+        raise AssertionError(
+            f"Groups overlap across splits: {overlapping.index.tolist()}"
+        )

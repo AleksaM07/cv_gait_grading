@@ -1,5 +1,0 @@
-experiments:
-  - synthetic_sanity_check
-  - image_degradation_smoke
-  - unseen_checkpoint_split
-  - optical_flow_vs_pca_ablation

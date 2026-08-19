@@ -1,6 +1,0 @@
-local_file,local_symbol,source_repository,source_commit,source_file,source_symbol,license,reuse_type,modifications,citation_key
-src/gait_aqa/data/import_walker_outputs.py,import_walker_outputs,https://github.com/AleksaM07/mujoco-bipedal-joystick-walker,33eaa1fb76f2ffb0fb8a821deb9cad27f3989426,analysis_outputs/*.csv,exported metrics,unclear,conceptual_reimplementation,"Reads documented CSV exports only; no source copied.",mujoco_walker_software
-src/gait_aqa/vision/motion_basis.py,MotionBasis,Richard Szeliski Computer Vision draft,2010-09-03,Section 8.2.2,learned motion models,book,conceptual_reimplementation,"Implements flow stacking and SVD/PCA basis from the described method.",szeliski2010
-src/gait_aqa/models/classical_regressor.py,NumpyRidgeRegressor,local original,,,,MIT,original,"Original simple Ridge implementation for this project.",visual_gait_aqa
-src/gait_aqa/data/synthetic_motion.py,generate_synthetic_dataset,local original,,,,MIT,original,"Original synthetic rectangles used for smoke tests.",visual_gait_aqa
-docs/reference_repository_audit.md,repository audit,all inspected repositories,see audit,LICENSE and README files,,mixed,original,"Records license decisions and commit hashes.",visual_gait_aqa

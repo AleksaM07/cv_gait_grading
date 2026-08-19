@@ -1,24 +1,71 @@
+# Python and tooling
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
 .venv/
 uv.lock
 
-_references/
-data/raw/*
-data/interim/*
-data/processed/*
-data/manifests/*.csv
-outputs/*
+# External reference checkouts
+/_references/
+/.tmp_opengait_review/
 
-!data/raw/.gitkeep
-!data/interim/.gitkeep
-!data/processed/.gitkeep
-!data/manifests/.gitkeep
-!outputs/models/.gitkeep
-!outputs/predictions/.gitkeep
-!outputs/figures/.gitkeep
-!outputs/videos/.gitkeep
-!outputs/reports/.gitkeep
+# Local datasets and derived data. Only directory markers are versioned.
+/MUJOCO_videos/
+/CMU_reference_videos/
+/data/**
+!/data/
+!/data/**/
+!/data/**/.gitkeep
+/datasets/**
+!/datasets/
+!/datasets/README.md
+
+# Video, motion-capture, array, and model payloads anywhere else.
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.m4v
+*.mpg
+*.mpeg
+*.bvh
+*.c3d
+*.fbx
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.parquet
+*.feather
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# OpenGait-style runtime output area. Keep only docs and directory markers.
+/output/**
+!/output/
+!/output/**/
+!/output/README.md
+!/output/**/.gitkeep
+
+# Backward-compatible ignore for the old plural output location.
+/outputs/
+
+# Local third-party source documents; provenance remains versioned.
+/KV_domaci.pdf
+/SzeliskiBook_20100903_draft.pdf
+
+# Report build products and historical outputs
+/reports/*.aux
+/reports/*.log
+/reports/*.out
+/reports/*.toc
+/reports/report_v*.pdf
+/reports/archive/

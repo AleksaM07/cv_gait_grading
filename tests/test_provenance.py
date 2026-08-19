@@ -4,8 +4,19 @@ from pathlib import Path
 
 
 class ProvenanceTests(unittest.TestCase):
+    def test_dataset_catalog_documents_local_payloads(self) -> None:
+        catalog = Path("datasets/README.md").read_text(encoding="utf-8")
+        for required_entry in (
+            "MUJOCO_videos/gait_dataset/",
+            "CMU_reference_videos/walking_flat/",
+            "data/interim/flow/",
+            "output/models/",
+            "https://github.com/ShiqiYu/OpenGait",
+        ):
+            self.assertIn(required_entry, catalog)
+
     def test_provenance_schema(self) -> None:
-        path = Path("docs/provenance.csv")
+        path = Path("reports/assets/docs/provenance.csv")
         with path.open(newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             self.assertEqual(

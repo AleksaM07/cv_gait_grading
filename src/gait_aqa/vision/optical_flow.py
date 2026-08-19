@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -49,11 +50,12 @@ def _opencv_farneback(gray_frames: np.ndarray) -> np.ndarray | None:
         return None
     frames_u8 = np.clip(gray_frames * 255.0, 0, 255).astype(np.uint8)
     flows: list[np.ndarray] = []
-    for previous, current in zip(frames_u8[:-1], frames_u8[1:], strict=True):
+    for previous, current in pairwise(frames_u8):
+        initial_flow = np.zeros((*previous.shape, 2), dtype=np.float32)
         flow = cv2.calcOpticalFlowFarneback(
             previous,
             current,
-            None,
+            initial_flow,
             pyr_scale=0.5,
             levels=3,
             winsize=15,
@@ -75,7 +77,7 @@ def _fallback_dense_flow(gray_frames: np.ndarray) -> np.ndarray:
     """
     flows: list[np.ndarray] = []
     centroids = [_foreground_centroid(frame) for frame in gray_frames]
-    for index, (previous, current) in enumerate(zip(gray_frames[:-1], gray_frames[1:], strict=True)):
+    for index, (previous, current) in enumerate(pairwise(gray_frames)):
         dy, dx = np.gradient(current)
         diff = current - previous
         centroid_delta = centroids[index + 1] - centroids[index]
