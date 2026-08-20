@@ -7,8 +7,10 @@ class ProvenanceTests(unittest.TestCase):
     def test_dataset_catalog_documents_local_payloads(self) -> None:
         catalog = Path("datasets/README.md").read_text(encoding="utf-8")
         for required_entry in (
-            "MUJOCO_videos/gait_dataset/",
+            "MUJOCO_videos_better/",
             "CMU_reference_videos/walking_flat/",
+            "datasets/disabled_gait/videos/",
+            "datasets/gahu/videos/",
             "data/interim/flow/",
             "output/models/",
             "https://github.com/ShiqiYu/OpenGait",

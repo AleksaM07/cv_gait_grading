@@ -51,8 +51,11 @@ That branch is therefore the preferred external tooling checkout for:
 - testing whether a reference clip should terminate early;
 - debugging why a retargeted clip falls, drifts, or penetrates the floor.
 
-It still does not yet provide a clean, project-ready headless batch exporter for
-all `runs/successful` policy checkpoints. That remains a follow-up integration task.
+This repository now supplies the missing project-ready headless batch exporter
+in `src/gait_aqa/reference_videos/render_walker_rollouts.py`. It discovers the
+external successful checkpoints, renders six deterministic scenarios from side
+and front-oblique cameras, excludes terminal fall poses, and writes resumable
+manifests without copying the external environment or policy implementation.
 
 ## Additional Dataset And Software References
 

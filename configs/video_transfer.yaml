@@ -1,0 +1,16 @@
+clip:
+  frames: 16
+  windows: 2
+  duration_seconds: 2.0
+
+representation:
+  pca_components: 64
+
+regression:
+  ridge_alphas: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+
+runtime:
+  device: auto
+  embedding_cache: data/interim/embeddings/r3d18_kinetics400
+  torch_home: output/torch_cache
+  seed: 13

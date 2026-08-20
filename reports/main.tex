@@ -5,6 +5,7 @@
 \usepackage[serbian,english]{babel}
 \usepackage{geometry}
 \usepackage{setspace}
+\usepackage[protrusion=true,expansion=false]{microtype}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
@@ -30,7 +31,8 @@
 \onehalfspacing
 \setlength{\parindent}{1.25cm}
 \setlength{\parskip}{0.35em}
-\graphicspath{{../output/predictions/}{assets/}{assets/book_pages/}}
+\setlength{\emergencystretch}{3em}
+\graphicspath{{assets/}{../output/predictions/}{assets/book_pages/}}
 
 \hypersetup{
   colorlinks=true,
@@ -83,9 +85,9 @@
 
   \vspace{2.4cm}
 
-  {\Huge\bfseries Vizuelna procena kvaliteta hoda iz RGB videa\par}
+  {\Huge\bfseries Vizuelna procena kvaliteta hoda MuJoCo politika iz RGB videa\par}
   \vspace{0.45cm}
-  {\Large Klasican pristup zasnovan na opti\v{c}kom toku, PCA modelu kretanja i regresiji\par}
+  {\Large Pore\dj enje klasi\v{c}nog motion baseline-a i R3D-18 transfer u\v{c}enja\par}
 
   \vspace{2.1cm}
 
@@ -107,22 +109,23 @@
 
 \chapter*{Sa\v{z}etak}
 \addcontentsline{toc}{chapter}{Sa\v{z}etak}
-Ovaj rad razmatra problem vizuelne procene kvaliteta hoda humanoidnog agenta na
-osnovu spoljnog RGB videa. Cilj projekta nije biomehani\v{c}ka analiza u
-klini\v{c}kom smislu, ve\'{c} izgradnja reproduktivnog i interpretabilnog
-pipeline-a koji iz video sekvence izvla\v{c}i gust opti\v{c}ki tok, formira
-niskodimenzioni model kretanja i na kraju predvi\dj a ukupni skor i direktno
-podr\v{z}ane ciljeve. Implementacija je zasnovana na klasi\v{c}nim metodama
-ra\v{c}unarskog vida: preprocessing-u slike, translacionom poravnanju, gustim
-poljima kretanja, PCA/SVD aproksimaciji i Ridge regresiji.
+Ovaj rad razmatra vizuelnu procenu simulatorom izvedenog kvaliteta hoda
+humanoidnog agenta na osnovu spoljnog RGB videa. Klasi\v{c}ni baseline kombinuje
+gust opti\v{c}ki tok, body-centered poravnanje, PCA/SVD model kretanja i Ridge
+regresiju. Novi transfer baseline koristi zamrznuti R3D-18 model prethodno
+obu\v{c}en na Kinetics-400, dve vremenski normalizovane video sekvence, PCA
+whitening nau\v{c}en bez labela i malu Ridge regresionu glavu.
 
-U radu se koristi skup od 56 bo\v{c}no renderovanih MuJoCo video sekvenci sa
-vi\v{s}e scenarija kretanja. Pored numeri\v{c}kog skora, sistem generi\v{s}e
-vizualizaciju opti\v{c}kog toka i heatmap temporalne energije kretanja. Eksperimentalni
-rezultati pokazuju da kompletan sistem radi end-to-end, ali i da su trenutne
-metrike za ukupni skor i stabilnost slabe. Zbog toga se projekat najbolje
-posmatra kao funkcionalan prototip i dobra osnova za dalja unapredjenja, a ne
-kao zavr\v{s}en sistem visoke ta\v{c}nosti.
+Reprezentacija se u\v{c}i na 975 neozna\v{c}enih walking klipova: 580 CMU
+kinemati\v{c}kih rendera i 395 realnih GaHu snimaka. Supervised skup sadr\v{z}i
+54 bo\v{c}na MuJoCo klipa iz devet nezavisnih politika. Podela je grupisana po
+politici. Nested leave-one-policy-out evaluacija pojedina\v{c}nih klipova daje
+MAE 11.23, dok agregiranje \v{s}est scenarija u ocenu politike smanjuje MAE na
+5.84 uz $R^2=0.830$ i Spearman korelaciju 0.983. Na fiksnom test skupu R3D-18 model posti\v{z}e
+MAE 12.35, naspram 22.17 za train-mean baseline i 35.84 za klasi\v{c}ni motion
+model. Rezultat predstavlja obe\'{c}avaju\'{c}i istra\v{z}iva\v{c}ki baseline,
+ali ne i klini\v{c}ki validiran skor: labele su simulatorski proxy, a broj
+nezavisnih politika je i dalje mali.
 
 \clearpage
 \pagenumbering{arabic}
@@ -146,12 +149,13 @@ hoda koristi isklju\v{c}ivo video, bez direktnog pristupa internim podacima koji
 su kori\v{s}\'{c}eni za formiranje target-a.
 
 Polazna hipoteza rada glasi da se u vizuelnom obrascu hoda nalazi dovoljno
-informacije za aproksimaciju ukupnog skora kvaliteta i nekoliko njegovih
-komponenti. Ako je to ta\v{c}no, tada bi klasi\v{c}ni alati ra\v{c}unarskog vida
-mogli da poslu\v{z}e kao transparentna alternativa te\v{s}kim dubokim modelima,
-ili barem kao stabilan i interpretabilan baseline. U skladu sa tim, sistem je
-namerno gra\dj en kao niz jasnih koraka: priprema frejmova, opti\v{c}ki tok,
-poravnanje, PCA motion basis, temporalne osobine i regresija.
+informacije za aproksimaciju ukupnog simulator-proxy skora. Hipoteza se proverava
+poredjenjem dva pristupa. Klasi\v{c}na grana koristi pripremu frejmova, opti\v{c}ki
+tok, poravnanje, PCA motion basis, temporalne osobine i regresiju. Transfer
+grana koristi prethodno obu\v{c}enu spatiotemporalnu R3D-18 reprezentaciju,
+neozna\v{c}ene walking klipove za PCA/whitening i malu regresionu glavu. Time
+klasi\v{c}ni metod ostaje transparentan dijagnosti\v{c}ki baseline, dok se
+direktno meri dobitak modernije video reprezentacije.
 
 Va\v{z}no je naglasiti da ovde cilj nije da se simulacioni skor predstavi kao
 medicinska istina. Naprotiv, skor je izvedena veli\v{c}ina konstruisana iz
@@ -220,6 +224,14 @@ Furijeovim sa\v{z}ecima i promeni PCA koeficijenata kroz vreme. Na kraju, sve te
 osobine ulaze u jednostavan ali stabilan regresioni model koji predvidja
 ukupni skor i komponente kvaliteta hoda.
 
+Transfer baseline dopunjuje ovu teorijsku osnovu trodimenzionalnim konvolucijama
+koje istovremeno obra\dj uju prostornu i vremensku osu video sekvence. Umesto
+fine-tune-ovanja velikog modela na samo 54 ozna\v{c}ena klipa, R3D-18 backbone
+ostaje zamrznut. Takav transfer u\v{c}enja koristi op\v{s}te motion osobine nau\v{c}ene
+na Kinetics-400 skupu, smanjuje broj trainable parametara i rizik od overfitting-a.
+PCA/whitening zatim prilagodjava embedding prostoru lokalnih walking videa bez
+upotrebe njihovih quality labela.
+
 \chapter{Pregled implementacije}
 Implementacija projekta je organizovana tako da prati prirodan tok obrade
 video podataka. Modul \path{src/gait_aqa/data/} zadu\v{z}en je za pripremu
@@ -228,9 +240,10 @@ manifesta, rad sa ulaznim video klipovima i organizaciju dataset-a. Modul
 pristupa: preprocessing frejmova, foreground obradu, procenu opti\v{c}kog toka,
 poravnanje i izgradnju motion basis modela.
 
-Posebni moduli sadr\v{z}e regresioni model, trening, evaluaciju metrika i
-generisanje vizuelnih izlaza. Takva podela odvaja numeri\v{c}ku obradu od
-prezentacije rezultata i \v{c}ini sistem lak\v{s}im za proveru.
+Posebni moduli sadr\v{z}e klasi\v{c}ni regresioni model, zamrznuti video-transfer
+pipeline, evaluaciju metrika i generisanje vizuelnih izlaza. Takva podela odvaja
+numeri\v{c}ku obradu od prezentacije rezultata i \v{c}ini sistem lak\v{s}im za
+proveru.
 
 U prakti\v{c}nom smislu, projekat se koristi kroz jedinstveni \texttt{gait-aqa}
 CLI. Time se izbegavaju duplicirane wrapper skripte, a priprema podataka,
@@ -244,12 +257,15 @@ trening, evaluacija i scoring ostaju jasno odvojene podkomande.
     \toprule
     Putanja & Uloga u sistemu \\
     \midrule
-    \texttt{MUJOCO\_videos/gait\_dataset/} & Realno renderovani side-view klipovi za trening i test. \\
+    \texttt{MUJOCO\_videos\_better/} & Terminal-safe side i front-oblique MuJoCo renderi. \\
     \texttt{CMU\_reference\_videos/} & BVH walking reference i MuJoCo renderi. \\
+    \texttt{datasets/gahu/} & Realni side-view walking klipovi bez quality labela. \\
+    \texttt{datasets/disabled\_gait/} & Frontalni realni klipovi samo za OOD proveru. \\
     \texttt{data/manifests/} & CSV manifesti i train/val/test podele. \\
     \texttt{src/gait\_aqa/vision/} & Preprocessing, opti\v{c}ki tok, poravnanje i motion basis. \\
-    \texttt{src/gait\_aqa/training/} & Trening klasi\v{c}nog baseline modela. \\
-    \texttt{reports/} & PDF izve\v{s}taj, modeli, logovi, predikcije, vizuelni izlazi i LaTeX fajlovi. \\
+    \texttt{src/gait\_aqa/training/} & Klasi\v{c}ni i R3D-18 transfer trening. \\
+    \texttt{output/} & Lokalni modeli, cache, predikcije i vizuelni izlazi. \\
+    \texttt{reports/} & PDF izve\v{s}taj, dokumentacija i LaTeX izvor. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -295,57 +311,55 @@ nula ili sto. U trenutnom export-u dostupni su ukupni skor, survival-derived
 stability skor i indikator pada.
 
 \chapter{Podaci i metodologija}
-Glavni eksperiment u ovoj verziji projekta ne koristi sinteticki demo dataset,
-ve\'{c} stvarne renderovane video klipove iz foldera
-\texttt{MUJOCO\_videos/gait\_dataset/}. Svaki klip u manifestu sadr\v{z}i putanju do videa,
-identitet politike, checkpoint, scenario, seed i oznaku ugla kamere. Manifest
-jasno razlikuje dostupne ciljeve od praznih, nedostupnih komponenti.
+Eksperiment koristi tri strogo odvojene uloge podataka. CMU i GaHu klipovi
+nemaju quality labele i koriste se samo za PCA/whitening reprezentacije. MuJoCo
+side-view klipovi nose simulatorom izveden ukupni skor i jedini su supervised
+podaci. Frontalni DisabledGait klipovi slu\v{z}e samo za proveru promene domena;
+njima se ne dodeljuje izmi\v{s}ljena ocena kvaliteta.
 
-U dataset-u koji je kori\v{s}\'{c}en za trenutni rezultat nalazi se 56 side-view klipova.
-Podela je izvedena grupisano, tako da klipovi iz istog checkpoint-a ne procure
-u train i test u isto vreme. To je va\v{z}no, jer bi bez toga model lako mogao da
-``prepozna'' porodicu skoro identi\v{c}nih sekvenci umesto da nau\v{c}i op\v{s}te
-vizuelne osobine kvalitetnog hoda.
+Svaki MuJoCo klip u manifestu sadr\v{z}i identitet politike, checkpoint,
+scenario, seed i kameru. Svih \v{s}est scenarija jedne politike deli isti
+\texttt{split\_group}. Time se spre\v{c}ava da model u treningu vidi druge skoro
+identi\v{c}ne snimke politike koja se kasnije pojavljuje u testu. Fiksna podela
+sadr\v{z}i \v{s}est train, jednu validation i dve test politike. Dodatno se
+izvodi nested leave-one-policy-out evaluacija: svaka od devet politika jednom
+postaje spolja\v{s}nji test, dok se Ridge regularizacija bira isklju\v{c}ivo na
+preostalim politikama.
 
 \begin{table}[H]
   \centering
-  \caption{Pregled trenutno kori\v{s}\'{c}enog skupa}
-  \begin{tabular}{lr}
+    \caption{Uloge podataka u transfer eksperimentu}
+  \begin{tabular}{p{5.0cm}rrp{4.2cm}}
     \toprule
-    Stavka & Vrednost \\
+    Izvor & Klipovi & Grupe & Uloga \\
     \midrule
-    Ukupan broj klipova & 56 \\
-    Train split & 40 \\
-    Validation split & 8 \\
-    Test split & 8 \\
-    Side pogled & 56 \\
-    Scenariji & forward, forward\_slow, turn, diagonal \\
-    Trajanje jednog klipa & oko 5 sekundi \\
-    FPS & 30 \\
+    CMU MuJoCo renderi & 580 & po CMU subjektu & neozna\v{c}ena reprezentacija \\
+    GaHu realni side-view & 395 & 44 subjekta & neozna\v{c}ena reprezentacija \\
+    MuJoCo side-view & 54 & 9 politika & supervised skor \\
+    DisabledGait frontalno & 125 & recording serije & OOD provera \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Sama metodologija eksperimenta sastoji se od nekoliko koraka. Najpre se iz
-svakog videa u\v{c}itavaju frejmovi i prolaze kroz osnovni preprocessing. Zatim
-se ra\v{c}una gust opti\v{c}ki tok i po potrebi uklanja dominantna translacija.
-Nakon toga se polja toka redukuju preko PCA motion basis pristupa, iz koeficijenata
-se grade temporalne osobine, a na kraju se trenira Ridge regresor.
+Za svaki video biraju se dva deterministi\v{c}ka vremenski normalizovana prozora
+od po 16 frejmova. Zamrznuti R3D-18, prethodno obu\v{c}en na Kinetics-400,
+proizvodi po jedan 512-dimenzioni embedding; dva embeddinga se prose\v{c}no
+agregiraju i L2-normalizuju. PCA sa 64 komponente i whitening fituje se samo na
+975 neozna\v{c}enih CMU i GaHu klipova i obja\v{s}njava 96.56\% njihove varijanse.
+Na kraju se trenira mala Ridge glava za ukupni simulator-proxy skor.
 
 \begin{enumerate}[leftmargin=1.4cm]
-  \item U\v{c}itavanje manifesta i video klipova.
-  \item Preprocessing frejmova i ra\v{c}unanje gustog opti\v{c}kog toka.
-  \item Fitovanje PCA motion basis modela samo na train split-u.
-  \item Gradnja feature vektora iz toka, koeficijenata i temporalnih sa\v{z}etaka.
-  \item Trening nezavisnih regresionih glava samo za dostupne ciljeve.
-  \item Evaluacija na test split-u kroz MAE, RMSE, $R^2$, Spearman i pairwise ranking accuracy.
+  \item Deterministi\v{c}ko vremensko uzorkovanje dva prozora po klipu.
+  \item Ekstrakcija i cache-iranje zamrznutih R3D-18 embeddinga.
+  \item Fitovanje PCA/whitening transformacije samo na neozna\v{c}enim klipovima.
+  \item Izbor Ridge regularizacije grupisanom validation ili unutra\v{s}njom CV petljom.
+  \item Evaluacija kroz MAE, RMSE, $R^2$, Spearman i pairwise ranking accuracy.
+  \item Fitovanje deployment glave na svih 54 ozna\v{c}enih klipova tek nakon evaluacije.
 \end{enumerate}
 
-Ovaj tok je metodolo\v{s}ki uskladjen sa bele\v{s}kama iz dokumenta
-\path{reports/assets/docs/methodology.md}: nema leakage-a, nema upotrebe
-simulator state-a tokom inferencije, a sav fokus je na onome \v{s}to je vidljivo
-iz samog videa. To je bitan kvalitet rada \v{c}ak i kada metrike jo\v{s} nisu
-zadovoljavaju\'{c}e.
+Tok nema policy leakage i ne koristi simulator state tokom inferencije.
+Pretrenirani backbone donosi op\v{s}tu video reprezentaciju, ali se ne fine-tune-uje
+na malom labeled skupu, \v{c}ime se ograni\v{c}ava rizik od overfitting-a.
 
 \chapter{Vizuelne osobine i motion representation}
 Najve\'{c}a prednost ovog projekta je to \v{s}to ne tretira video samo kao crnu
@@ -365,56 +379,78 @@ lokalnog pomeranja. Heatmap temporalne energije dopunjuje taj pogled bez
 neopravdane tvrdnje da clip-level regresor daje frame-level dijagnozu.
 
 \chapter{Eksperimenti i rezultati}
-Repo trenutno podr\v{z}ava pripremu realnog manifesta, trening klasi\v{c}nog
-baseline modela, evaluaciju nad test split-om i pojedina\v{c}no skoringovanje
-jednog videa uz vizuelne izlaze. To je va\v{z}no jer pokazuje da sistem nije samo
-fragment koda, nego kompletan eksperimentalni tok koji mo\v{z}e da se pokrene od
-po\v{c}etka do kraja.
-
-Najvažniji numeri\v{c}ki rezultat je, medjutim, prili\v{c}no trezan: model u
-trenutnoj formi ne posti\v{z}e dobru ta\v{c}nost za ukupni skor. Metrike sa
-poslednjeg pokretanja date su u Tabeli~\ref{tab:metrics}.
+Izvedena su dva glavna eksperimenta nad istom leakage-safe podelom: klasi\v{c}ni
+motion model i zamrznuti R3D-18 transfer model. Konstantni model koji vra\'{c}a
+prosek train labela slu\v{z}i kao obavezna sanity provera. R3D-18 je treniran na
+NVIDIA RTX 2060 GPU-u; prvo izvla\v{c}enje 1154 video embeddinga trajalo je oko
+16 minuta, dok ponavljanje sa popunjenim cache-om traje oko 25 sekundi.
 
 \begin{table}[H]
   \centering
-  \caption{Metrike na test split-u iz poslednjeg pokretanja}
+  \caption{Poredjenje modela na istih 12 klipova iz dve izdvojene politike}
   \label{tab:metrics}
-  \begin{tabular}{p{4cm}rrrrr}
+  \begin{tabular}{p{4.1cm}rrrrr}
     \toprule
-    Target & MAE & RMSE & $R^2$ & Spearman & Ranking \\
+    Model & MAE & RMSE & $R^2$ & Spearman & Ranking \\
     \midrule
-    overall\_score & 4.16 & 5.84 & -1.23 & -0.39 & 0.33 \\
-    stability\_score & 6.59 & 6.62 & 0.00 & 0.00 & 0.00 \\
+    R3D-18 transfer & \textbf{12.35} & \textbf{15.49} & \textbf{0.660} & \textbf{0.877} & \textbf{0.773} \\
+    Train-mean & 22.17 & 29.48 & -0.233 & -- & -- \\
+    Klasi\v{c}ni motion & 35.84 & 43.64 & -1.701 & -0.252 & 0.439 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Rezultati pokazuju da su \texttt{overall\_score} i \texttt{stability\_score}
-trenutno slabi. Negativan $R^2$ zna\v{c}i da model u tim ciljevima prakti\v{c}no
-ne obja\v{s}njava varijansu bolje od vrlo prostog baseline-a. Spearman korelacija
-za ukupni skor je takodje negativna, \v{s}to zna\v{c}i da poredak klipova po
-kvalitetu nije dobro uhva\'{c}en.
+R3D-18 smanjuje test MAE za 44.3\% u odnosu na train-mean baseline i za 65.6\%
+u odnosu na klasi\v{c}ni motion model. Pozitivan $R^2$ i visoka Spearman
+korelacija pokazuju da model hvata i veli\v{c}inu i poredak simulatorskih skorova
+na dve nevidjene politike. Ipak, fiksni test sadr\v{z}i samo dve politike, pa
+jedan povoljan split nije dovoljan za jaku tvrdnju o generalizaciji.
 
-Konstantni baseline koji uvek vra\'{c}a prosek train skupa ima test MAE 3.51 i
-RMSE 5.17, odnosno bolji je od trenutnog vizuelnog modela (MAE skill $-0.18$).
-Ridge regularizacija
-je izabrana samo na validation skupu ($\alpha=1000$), gde je smanjila MAE na
-2.82, ali taj dobitak se nije preneo na jedinu izdvojenu test politiku.
+Zato je izvedena nested policy evaluacija preko svih devet politika. Za svaku
+spolja\v{s}nju test politiku, Ridge hiperparametar bira se inner grupisanom
+validacijom bez pristupa toj politici. Agregirane out-of-fold metrike prikazane
+su u Tabeli~\ref{tab:nested-metrics}.
 
-Stability target ima veoma malu varijansu u test grupi, pa $R^2$, Spearman i
-ranking ne nose korisnu informaciju. Rezultat potvr\dj uje izvr\v{s}ivost
-pipeline-a, ali ne i generalizaciju na nove politike.
+\begin{table}[H]
+  \centering
+  \caption{Nested leave-one-policy-out evaluacija R3D-18 modela}
+  \label{tab:nested-metrics}
+  \begin{tabular}{lrrrrrr}
+    \toprule
+    Nivo & $N$ & MAE & RMSE & $R^2$ & Spearman & Ranking \\
+    \midrule
+    Klip & 54 & 11.23 & 13.64 & 0.638 & 0.782 & 0.790 \\
+    Policy prosek & 9 & 5.84 & 6.99 & 0.830 & 0.983 & 0.972 \\
+    Leave-one mean & 9 & 15.59 & 19.07 & -0.266 & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-Zbog toga ove rezultate ne treba predstavljati kao ``jak model'', nego kao
-po\v{s}ten i funkcionalan prototip. To nije lo\v{s}a pozicija za seminarski rad:
-sistem je kompletan, reproduktivan i interpretabilan, a ograni\v{c}enja su jasno
-vidljiva i obrazlo\v{z}ena.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\textwidth]{transfer_results_summary.png}
+  \caption{Levo: nested held-out prosek za svaku od devet politika. Desno: policy-level
+  MAE R3D-18 modela i leave-one-policy mean baseline-a.}
+  \label{fig:transfer-results}
+\end{figure}
+
+Za deployment glavu izabrano je $\alpha=10$ grupisanom validacijom preko svih
+devet politika, nakon \v{c}ega je glava fitovana na svih 54 ozna\v{c}enih klipova.
+To ne menja evaluacione metrike, koje ostaju zasnovane isklju\v{c}ivo na
+predikcijama iz prethodno odvojenih evaluacionih foldova.
+
+Prakti\v{c}ni izlaz sistema nije samo ocena jednog klipa. Za novu politiku model
+se u\v{c}itava jednom, ocenjuje side-view snimke scenarija \texttt{forward},
+\texttt{forward\_slow}, \texttt{forward\_fast}, \texttt{turn},
+\texttt{lateral} i \texttt{diagonal}, a zatim vra\'{c}a prosek, standardnu
+devijaciju, minimum, maksimum i scenario breakdown. Skor politike je validan
+jedino ako svih \v{s}est snimaka prodje camera i OOD proveru.
 
 \chapter{Vizuelni prikazi iz sistema}
-Jedan od razloga zbog kojih je ovaj pristup i dalje vredan, uprkos slabijim
-overall metrikama, jeste to \v{s}to generi\v{s}e kvalitetne medjuartefakte za
-analizu. U nastavku su prikazani konkretni izlazi iz programa nad jednim
-realnim video klipom.
+Klasi\v{c}na grana sistema ostaje korisna kao interpretabilni dijagnosti\v{c}ki
+alat iako R3D-18 daje bolju regresiju ukupnog skora. Ona generi\v{s}e opti\v{c}ki
+tok i temporalnu heatmap-u, pa se obrazac kretanja mo\v{z}e vizuelno proveriti.
+U nastavku su prikazani njeni izlazi nad jednim video klipom.
 
 \begin{figure}[H]
   \centering
@@ -429,53 +465,60 @@ realnim video klipom.
     \includegraphics[width=\textwidth]{audit_score_motion_heatmap.png}
     \caption{Temporalna energija kretanja}
   \end{subfigure}
-  \caption{Vizuelna obja\v{s}njenja koja generi\v{s}e sistem za jedan klip.}
+  \caption{Klasi\v{c}ni motion dijagnosti\v{c}ki prikazi za jedan klip.}
 \end{figure}
+
+Ovi izlazi omogu\'{c}avaju proveru da li video sadr\v{z}i o\v{c}ekivani obrazac
+kretanja, globalni drift ili nagli prekid. Oni nisu atribuciona metoda za R3D-18
+i ne tvrde da obja\v{s}njavaju njegovu pojedina\v{c}nu predikciju. Takvo
+razdvajanje spre\v{c}ava da koristan dijagnosti\v{c}ki prikaz bude pogre\v{s}no
+predstavljen kao obja\v{s}njenje dubokog modela.
+
+Kao end-to-end demonstracija policy komande, poznata politika P01 ocenjena je
+preko svih \v{s}est scenarija. Rezultat u Tabeli~\ref{tab:policy-demo} slu\v{z}i
+isklju\v{c}ivo kao funkcionalni sanity check, jer je P01 deo training kohorte;
+evaluacione tvrdnje i dalje dolaze samo iz held-out i nested rezultata.
 
 \begin{table}[H]
   \centering
-  \caption{Primer procene po komponentama za jedan klip}
-  \begin{tabular}{lr}
+  \caption{Primer policy-level izlaza za P01}
+  \label{tab:policy-demo}
+  \begin{tabular}{lrrrrrrr}
     \toprule
-    Komponenta & Skor \\
+    & diag. & forward & fast & slow & lateral & turn & prosek \\
     \midrule
-    Overall & 57.18 \\
-    Stability & 90.15 \\
-    Fall probability & 0.98 \\
-    Ostale komponente & nedostupne \\
+    Skor & 80.33 & 90.80 & 82.35 & 93.64 & 73.05 & 74.46 & 82.44 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Ovi izlazi su korisni zato \v{s}to omogu\'{c}avaju dvostruko tuma\v{c}enje.
-Sa jedne strane, korisnik dobija kona\v{c}an numeri\v{c}ki skor. Sa druge strane,
-mo\v{z}e da vidi za\v{s}to je model do\v{s}ao do te procene i kako izgleda dinami\v{c}ki
-obrazac na kojem se odluka zasniva. Upravo taj deo \v{c}ini rad mnogo
-uverenljivijim od obi\v{c}nog CSV izlaza bez ikakvog vizuelnog konteksta.
+Standardna devijacija scenarija je 7.66, svih 6/6 snimaka je pro\v{s}lo camera
+i OOD proveru, a policy skor je ozna\v{c}en validnim.
 
 \chapter{Diskusija}
-Najpoštenije je re\'{c}i da rezultati potvr\dj uju dve stvari istovremeno.
-Prva je da je vizuelni signal dovoljan da se iz njega izvuku smislene
-karakteristike kretanja i napravi kompletan sistem za scoring. Druga je da taj
-signal, u trenutnom obliku feature-a i target definicije, nije dovoljan da da
-jak i stabilan model za ukupni kvalitet hoda.
+Rezultati pokazuju da pretrenirana spatiotemporalna reprezentacija prenosi
+korisniji signal od ru\v{c}no konstruisanih motion osobina. Dobitak nije samo
+posledica pore\dj enja sa slabim klasi\v{c}nim modelom: R3D-18 je znatno bolji i
+od train-mean baseline-a, a nested evaluacija zadr\v{z}ava pozitivan $R^2$ kada
+svaka politika redom postane nevidjeni test.
 
-Vi\v{s}e je mogu\'{c}ih razloga za to. Prvi je mali skup podataka: 56 klipova je
-relativno malo za zadatak u kome postoji vi\v{s}e scenarija i seed-ova, ali samo
-sedam nezavisnih politika. Drugi razlog je sama priroda target-a. Ukupni skor nije ru\v{c}no
-ocenjivana ljudska oznaka, ve\'{c} simulaciono izvedena veli\v{c}ina koja mo\v{z}da ne
-ima dovoljno direktan vizuelni ekvivalent u svakom trenutku sekvence.
+Ipak, devet politika nisu dovoljne za zaklju\v{c}ak da je problem re\v{s}en.
+\v{S}est scenarija jedne politike predstavljaju korelisane klipove, a ne \v{s}est
+nezavisnih subjekata. Nested rezultat je zato metodolo\v{s}ki mnogo vredniji od
+random video split-a, ali interval neizvesnosti ostaje \v{s}irok. Dodatno,
+ciljni skor je scenario-relative simulaciona kompozicija stabilnosti, pra\'{c}enja,
+uspravnosti i glatko\'{c}e, a ne ekspertna ocena ljudskog hoda.
 
-Tre\'{c}i razlog je mali broj nezavisnih grupa: dva seed-a iste politike ne
-predstavljaju dve nove politike. Aktivni eksperiment zato namerno koristi samo
-kanonski side pogled, bez me\v{s}anja front-oblique snimaka.
+Promena domena je vidljiva i numeri\v{c}ki. Prag udaljenosti trening domena je
+1.661, dok frontalni DisabledGait klipovi imaju medijanu 2.307 i 95. percentil
+2.559. To je dobar rezultat za safety logiku: sistem prepoznaje da frontalni
+realni snimci nisu podr\v{z}ani. Nije, medjutim, dokaz da deployment model dobro
+ocenjuje realne ljude. Takvim klipovima se zato prikazuje upozorenje, a
+\texttt{clinical\_score\_valid} uvek ostaje false.
 
-Ipak, ovaj rad nije bez doprinosa. Naprotiv, kao studentski projekat on ve\'{c}
-ispunjava nekoliko va\v{z}nih kriterijuma: postoji jasna ideja, direktna veza sa
-literaturom, potpuno funkcionalna implementacija, eksperimentalni tok koji se
-mo\v{z}e ponoviti i po\v{s}tena analiza ograni\v{c}enja. To je dobra osnova za slede\'{c}u
-fazu rada, u kojoj bi se mogla uvesti analiza po uglovima kamere, ve\'{c}i skup
-sekvenci ili duboki video baseline za poredjenje.
+Moja procena je da je R3D-18 v1 dovoljno dobar za izbor simulacionih klipova,
+rangiranje novih walker politika i proveru ostatka pipeline-a. Nije dovoljno
+dobar za tvrdnju o kvalitetu ljudskog hoda, invaliditetu ili rehabilitaciji.
 
 \chapter{Ograni\v{c}enja i budu\'{c}i rad}
 Najva\v{z}nije ograni\v{c}enje rada jeste to \v{s}to ciljni skor poti\v{c}e iz simulatora,
@@ -493,33 +536,33 @@ scenarija, aktivni side-view dataset je i dalje relativno mali. Za bolju procenu
 op\v{s}tosti modela bilo bi korisno imati vi\v{s}e klipova, vi\v{s}e politika i
 odvojene eksperimente po kameri, scenariju i tipu hoda.
 
-Najvažniji pravci budu\'{c}eg rada su:
+Najva\v{z}niji pravci budu\'{c}eg rada su:
 \begin{itemize}
-  \item unapredjenje target definicije i njene bolje veze sa vizuelno merljivim osobinama;
-  \item ve\'{c}i skup realno renderovanih sekvenci;
-  \item odvojena analiza po uglovima kamere i scenarijima;
-  \item poredjenje sa \texttt{reference\_videos/} walking skupom;
-  \item uvodjenje jednog modernog deep video baseline-a kao kontrasta klasi\v{c}nom pristupu.
+  \item zamrznuti v1 protokol testirati na vi\v{s}e novih walker politika;
+  \item prikupiti realne side-view snimke sa vi\v{s}e nezavisnih ekspertnih ocenjiva\v{c}a;
+  \item odvojiti subjekte i lokacije izmedju treninga i finalnog testa;
+  \item tek sa ve\'{c}im labeled skupom kontrolisano fine-tune-ovati poslednji R3D blok;
+  \item kalibrisati uncertainty i unapred definisati kriterijum odbijanja OOD ulaza.
 \end{itemize}
 
 \chapter{Zaklju\v{c}ak}
-U radu je predstavljen kompletan pipeline za vizuelnu procenu kvaliteta hoda iz
-RGB video sekvenci. Sistem koristi klasi\v{c}ne metode ra\v{c}unarskog vida,
-inspirisane Szeliski literaturom, i kombinuje ih sa jednostavnim regresionim
-modelom. Klju\v{c}na vrednost projekta nije u tome \v{s}to trenutno posti\v{z}e
-izvanredne metrike, nego u tome \v{s}to je metodolo\v{s}ki jasan, reproduktivan i
-interpretabilan.
+U radu je predstavljen kompletan pipeline za vizuelnu procenu simulatorom
+izvedenog kvaliteta hoda iz RGB videa. Klasi\v{c}na Szeliski-inspirisana grana
+obezbedjuje interpretabilne motion prikaze, dok zamrznuti R3D-18 transfer model
+daje znatno bolju numeri\v{c}ku procenu ukupnog skora.
 
-Eksperimenti pokazuju da pipeline radi od manifesta do H.264 izlaza, ali da
-ukupan skor ne generalizuje dobro na izdvojenu politiku. Zbog toga je najkorektnije re\'{c}i da je
-projekat trenutno funkcionalan prototip sa jasnim potencijalom za dalje
-unapredjenje.
+Na fiksnom clip-level policy-held-out testu R3D-18 posti\v{z}e MAE 12.35.
+Nested evaluacija policy proseka preko svih devet politika daje MAE 5.84,
+$R^2=0.830$ i Spearman 0.983, naspram MAE 15.59 za leave-one-policy mean
+baseline. Time je pokazano da spoljni RGB video sadr\v{z}i koristan signal za
+aproksimaciju definisanog simulacionog target-a. Leakage-safe podela, odvojeno
+biranje hiperparametara i OOD upozorenja \v{c}ine rezultat reproduktivnim i
+metodolo\v{s}ki odbranjivim.
 
-Za studentski projekat to je i dalje dobar ishod: postoji ozbiljna veza izmedju
-teorije i implementacije, pokazana je sposobnost da se izgradi i evaluira
-kompletan sistem, a ograni\v{c}enja nisu sakrivena nego eksplicitno analizirana.
-Upravo ta kombinacija tehni\v{c}ke realizacije i po\v{s}tene diskusije daje ovom
-radu akademsku vrednost.
+Glavno ograni\v{c}enje ostaje semantika labela i mali broj nezavisnih politika.
+Zato je kona\v{c}ni zaklju\v{c}ak precizan: model je uspe\v{s}an v1 istra\v{z}iva\v{c}ki
+baseline za simulirane side-view sekvence, ali nije validiran za medicinsku ili
+klini\v{c}ku procenu ljudskog hoda.
 
 \chapter*{Literatura}
 \addcontentsline{toc}{chapter}{Literatura}
@@ -528,6 +571,11 @@ radu akademsku vrednost.
   draft version, September 3, 2010.
   \item Gunnar Farneback, \textit{Two-Frame Motion Estimation Based on Polynomial Expansion}, 2003.
   \item PECoP: \textit{Parameter Efficient Continual Pretraining for Action Quality Assessment}, WACV 2024.
+  \item Du Tran, Heng Wang, Lorenzo Torresani, Jamie Ray, Yann LeCun i Manohar
+  Paluri, \textit{A Closer Look at Spatiotemporal Convolutions for Action
+  Recognition}, CVPR 2018.
+  \item Torchvision R3D-18 video model sa Kinetics-400 V1 pretreniranim te\v{z}inama,
+  \url{https://docs.pytorch.org/vision/stable/models.html}.
   \item CARE-PD repository, inspected as conceptual reference for AQA and rehabilitation scoring.
   \item Projekat \texttt{mujoco-bipedal-joystick-walker}, kori\v{s}\'{c}en kao izvor renderovanih sekvenci i label signala.
   \item Resty Wulanningrum, Anik Nur Handayani i Heru Wahyu Herwanto,

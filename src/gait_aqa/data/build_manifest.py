@@ -16,9 +16,6 @@ REQUIRED_RENDER_COLUMNS = {
     "seed",
     "camera",
     "composite_score",
-    "tracking_rmse",
-    "mean_torso_up",
-    "mean_foot_slip_speed",
     "mean_first_fall_survival_fraction",
 }
 
@@ -33,7 +30,7 @@ def load_manifest(path: str | Path) -> pd.DataFrame:
 
 def prepare_real_video_manifest(
     input_manifest: str | Path,
-    output_manifest: str | Path = "data/manifests/real_videos_side_split.csv",
+    output_manifest: str | Path = "data/manifests/better_videos_side_split.csv",
     dataset_root: str | Path | None = None,
     seed: int = 13,
     camera: str | None = "side",
@@ -146,17 +143,14 @@ def _clip_id(row: pd.Series, video_path: Path) -> str:
 def _source_scores(source: pd.DataFrame) -> pd.DataFrame:
     """Return only scores directly supported by the renderer export.
 
-    The source composite was normalized over a larger policy population and
-    its smoothness input is absent from this compact export. Consequently its
-    component scores cannot be reconstructed without changing their meaning.
-    Survival fraction is already dimensionless on [0, 1], so it is retained as
-    the explicit stability target; unsupported components remain missing.
+    The renderer computes its composite once per rollout from stability,
+    tracking, upright posture, and action smoothness across the policy cohort.
+    Some environments cannot expose optional diagnostics such as foot slip, so
+    those diagnostics must not block conversion when the exported composite and
+    survival target are valid.
     """
     numeric_columns = [
         "composite_score",
-        "tracking_rmse",
-        "mean_torso_up",
-        "mean_foot_slip_speed",
         "mean_first_fall_survival_fraction",
     ]
     numeric = source[numeric_columns].apply(pd.to_numeric, errors="coerce")

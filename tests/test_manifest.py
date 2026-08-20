@@ -27,7 +27,9 @@ class ManifestTests(unittest.TestCase):
                         "composite_score": 0.75,
                         "tracking_rmse": 0.2,
                         "mean_torso_up": 0.95,
-                        "mean_foot_slip_speed": 0.1,
+                        # Optional telemetry is unavailable in some MuJoCo
+                        # environments and must not invalidate core labels.
+                        "mean_foot_slip_speed": np.nan,
                         "mean_first_fall_survival_fraction": 1.0,
                         "status": "recorded",
                         "frames": 150,

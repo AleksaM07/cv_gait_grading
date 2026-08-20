@@ -1,7 +1,10 @@
 # LaTeX report
 
 `main.tex` is the report source and `main.pdf` is its built form. The build
-scripts run two LaTeX passes and remove temporary `.aux`, `.log`, `.out`, and
+scripts regenerate the tracked transfer-results figure from the current
+prediction CSV and training-report JSON when those ignored runtime artifacts
+are present. A clean checkout can use the audited tracked figure. The scripts
+then run two LaTeX passes and remove temporary `.aux`, `.log`, `.out`, and
 `.toc` files.
 
 Runtime models, predictions, figures, logs, and scored videos are stored under

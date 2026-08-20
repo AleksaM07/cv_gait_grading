@@ -37,15 +37,16 @@
    `src/gait_aqa/training/train_classical.py`.
 
 10. Modern video baseline
-    Future work only. Compare after the classical model is validated on real
-    rendered clips.
+    Frozen R3D-18 Kinetics-400 backbone, unlabeled PCA/whitening, grouped Ridge
+    head, and policy-level aggregation.
 
 11. Experimental setup
     Implementation: `src/gait_aqa/data/split_dataset.py`,
     `src/gait_aqa/evaluation/metrics.py`.
 
 12. Results
-    Tables: MAE, RMSE, R2, Spearman, pairwise ranking accuracy, irregularity F1.
+    Tables: fixed policy-held-out and nested policy CV MAE, RMSE, R2, Spearman,
+    and pairwise ranking accuracy versus train-mean and classical baselines.
 
 13. Failure analysis
     Figures: score-over-time plots, flow overlays, high-disagreement examples.

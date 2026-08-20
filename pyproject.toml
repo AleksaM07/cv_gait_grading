@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "RGB-video gait quality assessment for simulated humanoid walking."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
+license = { text = "MIT" }
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.1",
@@ -18,11 +18,17 @@ dependencies = [
 
 [project.optional-dependencies]
 render = ["mujoco>=3.2", "imageio-ffmpeg>=0.5"]
+deep = ["torch>=2.6", "torchvision>=0.21"]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10"]
 
 [project.scripts]
 gait-aqa = "gait_aqa.cli:main"
 render-cmu-mujoco = "gait_aqa.reference_videos.render_mujoco:main"
+render-walker-rollouts = "gait_aqa.reference_videos.render_walker_rollouts:main"
+prepare-transfer-manifests = "gait_aqa.data.build_transfer_manifests:main"
+train-video-transfer = "gait_aqa.training.train_video_transfer:main"
+score-video-transfer = "gait_aqa.training.train_video_transfer:score_main"
+score-policy-transfer = "gait_aqa.training.train_video_transfer:score_policy_main"
 
 [tool.ruff]
 line-length = 88

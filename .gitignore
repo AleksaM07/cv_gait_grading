@@ -12,8 +12,9 @@ uv.lock
 /_references/
 /.tmp_opengait_review/
 
-# Local datasets and derived data. Only directory markers are versioned.
+# Local datasets and derived data. Only catalog/source notes and markers are versioned.
 /MUJOCO_videos/
+/MUJOCO_videos_better/
 /CMU_reference_videos/
 /data/**
 !/data/
@@ -22,6 +23,8 @@ uv.lock
 /datasets/**
 !/datasets/
 !/datasets/README.md
+!/datasets/*/
+!/datasets/*/SOURCE.md
 
 # Video, motion-capture, array, and model payloads anywhere else.
 *.mp4
@@ -47,6 +50,7 @@ uv.lock
 *.pth
 *.ckpt
 *.onnx
+*.jpg
 
 # OpenGait-style runtime output area. Keep only docs and directory markers.
 /output/**

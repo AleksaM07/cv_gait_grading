@@ -71,17 +71,17 @@ def main(argv: list[str] | None = None) -> None:
     prepare_real.add_argument(
         "--input-manifest",
         type=Path,
-        default=Path("MUJOCO_videos/gait_dataset/manifest.csv"),
+        default=Path("MUJOCO_videos_better/manifest.csv"),
     )
     prepare_real.add_argument(
         "--dataset-root",
         type=Path,
-        default=Path("MUJOCO_videos/gait_dataset"),
+        default=Path("MUJOCO_videos_better"),
     )
     prepare_real.add_argument(
         "--output",
         type=Path,
-        default=Path("data/manifests/real_videos_side_split.csv"),
+        default=Path("data/manifests/better_videos_side_split.csv"),
     )
     prepare_real.add_argument(
         "--camera",
@@ -112,7 +112,7 @@ def main(argv: list[str] | None = None) -> None:
     train.add_argument(
         "--manifest",
         type=Path,
-        default=Path("data/manifests/real_videos_side_split.csv"),
+        default=Path("data/manifests/better_videos_side_split.csv"),
     )
     train.add_argument(
         "--model", type=Path, default=Path("output/models/classical_side.pkl")

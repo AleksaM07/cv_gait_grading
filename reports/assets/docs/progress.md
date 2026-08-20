@@ -13,17 +13,22 @@
 - Walker CSV exports were inspected and imported successfully from the cloned
   reference checkout.
 
-## Phase 2-4
+## Phase 2-5
 
 - CMU BVH retargeting, honest source labels, FPS-normalized dense motion,
   incremental SVD/PCA, stable Ridge least squares, grouped splitting,
   evaluation, H.264 output, and visualization are implemented.
 - The side-view renderer validates and atomically writes H.264 reference clips.
-- Pytest, Ruff, and mypy cover the active classical pipeline.
+- A frozen R3D-18 transfer baseline is trained and evaluated without policy
+  leakage. It outperforms both train-mean and classical motion baselines.
+- Single-video and standardized six-scenario policy inference are implemented.
+- Pytest, Ruff, and mypy cover the active classical, rendering, transfer, and
+  report-figure pipelines.
 
 ## Remaining Work
 
-- Generate a real `uv.lock` once `uv` is installed.
 - Add more independent policies before treating metrics as generalization.
-- Export the upstream component scores if component-level supervision is needed.
-- Evaluate a deep-video baseline after the classical dataset is complete.
+- Collect independent human side-view clips and expert labels only if the scope
+  is deliberately expanded beyond simulated policy evaluation.
+- Add calibrated uncertainty after substantially more policy groups exist.
+- Fill in any faculty-required mentor/course metadata before submission.
